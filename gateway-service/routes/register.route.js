@@ -3,7 +3,7 @@ const router = express.Router();
 
 
 const registerdRoutes =  [] ;
-router.post('/register' , (req , res) =>{
+router.post('/' , (req , res) =>{
     const  routes = req.body ;
     if(!Array.isArray(routes)){
         return res.status(400).send("Routes must be  array");

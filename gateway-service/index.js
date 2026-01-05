@@ -1,7 +1,8 @@
 require("dotenv").config();
 
 const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
+const httpProxy = require("http-proxy");
+
 
 const authMiddleware = require('./middlewares/auth.middleware');
 
@@ -11,17 +12,27 @@ const {
 } = require("./routes/register.route");
 
 const app = express();
+const proxy = httpProxy.createProxyServer({});
+
 const port = process.env.PORT || 3000;
 
-app.use(express.json());
 
 
-app.use(registerRouter);
+
+app.use("/register", express.json(), registerRouter);
+
 
 app.use(authMiddleware);
 
+proxy.on("proxyReq", (proxyReq, req) => {
+  if (req.body && Object.keys(req.body).length) {
+    const bodyData = JSON.stringify(req.body);
+    proxyReq.setHeader("Content-Type", "application/json");
+    proxyReq.write(bodyData);
+  }
+});
 
-app.use((req, res, next) => {
+app.use((req, res) => {
   const route = registerdRoutes.find(
     r => r.method === req.method && r.path === req.path
   );
@@ -31,12 +42,16 @@ app.use((req, res, next) => {
       message: "Route not registered in gateway"
     });
   }
-
-  return createProxyMiddleware({
-    target: route.target,
-    changeOrigin: true
-  })(req, res, next);
+  
+  proxy.web(req, res, {
+  target: route.target,
+  changeOrigin: true
 });
+
+
+  
+});
+
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
