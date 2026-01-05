@@ -6,7 +6,7 @@ const axios = require('axios');
 
 const authRoute = require('./routes/auth.route');
 const userRoutes = require("./routes/user.route");
-
+const bussinessURL = process.env.BASE_URL ;
 
 const app = express();
 app.use(express.json());
@@ -22,34 +22,34 @@ const registerRoutesWithGateway = async()=>{
         {
             method : "POST" ,
             path : "/login",
-            target : "http://localhost:3001"
+            target : bussinessURL
 
         },
         {
             method : "GET" ,
             path : "/users",
-            target : "http://localhost:3001"
+            target : bussinessURL
         },
         {
             method : "POST" ,
             path : "/users",
-            target : "http://localhost:3001"
+            target : bussinessURL
         },
         {
             method : "PUT" ,
             path : "/users/:id",
-            target : "http://localhost:3001"
+            target : bussinessURL
         },
         {
             method : "DELETE" ,
             path : "/users/:id",
-            target : "http://localhost:3001"
+            target : bussinessURL
         }
     ];
 
     try{
         console.log("Registering routes with gateway...");
-        const response = await axios.post( 'http://localhost:3000/register' , routes );
+        await axios.post( `${process.env.GATEWAY_URL}/register` , routes );
         console.log("working register ");
         
     }catch(err){
