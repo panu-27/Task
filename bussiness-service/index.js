@@ -5,6 +5,8 @@ const express = require('express');
 const axios = require('axios');
 
 const authRoute = require('./routes/auth.route');
+const userRoutes = require("./routes/user.route");
+
 
 const app = express();
 app.use(express.json());
@@ -12,6 +14,7 @@ const port = process.env.PORT ;
 
 
 app.use(authRoute);
+app.use(userRoutes);
 
 
 const registerRoutesWithGateway = async()=>{
@@ -21,6 +24,26 @@ const registerRoutesWithGateway = async()=>{
             path : "/login",
             target : "http://localhost:3001"
 
+        },
+        {
+            method : "GET" ,
+            path : "/users",
+            target : "http://localhost:3001"
+        },
+        {
+            method : "POST" ,
+            path : "/users",
+            target : "http://localhost:3001"
+        },
+        {
+            method : "PUT" ,
+            path : "/users/:id",
+            target : "http://localhost:3001"
+        },
+        {
+            method : "DELETE" ,
+            path : "/users/:id",
+            target : "http://localhost:3001"
         }
     ];
 

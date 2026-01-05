@@ -22,6 +22,26 @@ const port = process.env.PORT || 3000;
 app.use("/register", express.json(), registerRouter);
 
 
+
+app.use((req, res, next) => {
+  const route = registerdRoutes.find(
+    r =>
+      r.method === req.method &&
+      req.path.startsWith(r.path.split("/:")[0])
+  );
+
+  if (!route) {
+    return res.status(404).json({
+      message: "Route not registered in gateway"
+    });
+  }
+
+  req._matchedRoute = route;
+  next();
+});
+
+
+
 app.use(authMiddleware);
 
 proxy.on("proxyReq", (proxyReq, req) => {
@@ -32,26 +52,13 @@ proxy.on("proxyReq", (proxyReq, req) => {
   }
 });
 
+
 app.use((req, res) => {
-  const route = registerdRoutes.find(
-    r => r.method === req.method && r.path === req.path
-  );
-
-  if (!route) {
-    return res.status(404).json({
-      message: "Route not registered in gateway"
-    });
-  }
-  
   proxy.web(req, res, {
-  target: route.target,
-  changeOrigin: true
+    target: req._matchedRoute.target,
+    changeOrigin: true
+  });
 });
-
-
-  
-});
-
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
